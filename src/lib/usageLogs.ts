@@ -1,5 +1,6 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database, UsageLogRow, UsageStats } from '../types/usageLog';
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+import type { Database, UsageLogRow, UsageStats } from '../types/usageLog'
 
 export async function logItemUsage(
   supabase: SupabaseClient<Database>,
@@ -9,14 +10,14 @@ export async function logItemUsage(
   const {
     data: { user },
     error: authError,
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   if (authError) {
-    throw authError;
+    throw authError
   }
 
   if (!user) {
-    throw new Error('You must be authenticated to log item usage.');
+    throw new Error('You must be authenticated to log item usage.')
   }
 
   const { data, error } = await supabase
@@ -28,13 +29,13 @@ export async function logItemUsage(
       used_at: new Date().toISOString(),
     })
     .select('*')
-    .single();
+    .single()
 
   if (error) {
-    throw error;
+    throw error
   }
 
-  return data;
+  return data
 }
 
 export async function getUsageStats(
@@ -44,22 +45,22 @@ export async function getUsageStats(
   const { data, error } = await supabase
     .from('usage_logs')
     .select('item_id,user_id,used_at,scene_tag')
-    .eq('item_id', itemId);
+    .eq('item_id', itemId)
 
   if (error) {
-    throw error;
+    throw error
   }
 
-  const rows = data ?? [];
+  const rows = data ?? []
   const byScene = rows.reduce<Record<string, number>>((acc, row) => {
-    acc[row.scene_tag] = (acc[row.scene_tag] ?? 0) + 1;
-    return acc;
-  }, {});
+    acc[row.scene_tag] = (acc[row.scene_tag] ?? 0) + 1
+    return acc
+  }, {})
 
-  const uniqueUsers = new Set(rows.map((row) => row.user_id)).size;
+  const uniqueUsers = new Set(rows.map((row) => row.user_id)).size
   const lastUsedAt = rows
     .map((row) => row.used_at)
-    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null;
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null
 
   return {
     itemId,
@@ -67,5 +68,5 @@ export async function getUsageStats(
     uniqueUsers,
     lastUsedAt,
     byScene,
-  };
+  }
 }
