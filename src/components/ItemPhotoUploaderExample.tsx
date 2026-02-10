@@ -1,48 +1,39 @@
-import React, { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { uploadItemPhotos, UploadedItemPhoto } from '../lib/itemPhotoUpload';
+import { type ChangeEvent, useState } from 'react'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
+import { uploadItemPhotos, type UploadedItemPhoto } from '../lib/itemPhotoUpload'
+import { supabase } from '../lib/supabase'
 
 interface ItemPhotoUploaderExampleProps {
-  itemId: string;
+  itemId: string
 }
 
 export function ItemPhotoUploaderExample({ itemId }: ItemPhotoUploaderExampleProps) {
-  const [files, setFiles] = useState<File[]>([]);
-  const [photos, setPhotos] = useState<UploadedItemPhoto[]>([]);
-  const [errors, setErrors] = useState<string[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
+  const [files, setFiles] = useState<File[]>([])
+  const [photos, setPhotos] = useState<UploadedItemPhoto[]>([])
+  const [errors, setErrors] = useState<string[]>([])
+  const [isUploading, setIsUploading] = useState(false)
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const nextFiles = Array.from(event.target.files ?? []);
-    setFiles(nextFiles);
-  };
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextFiles = Array.from(event.target.files ?? [])
+    setFiles(nextFiles)
+  }
 
   const handleUpload = async () => {
-    setIsUploading(true);
-    setErrors([]);
+    setIsUploading(true)
+    setErrors([])
 
-    const result = await uploadItemPhotos(supabase, itemId, files);
+    const result = await uploadItemPhotos(supabase, itemId, files)
 
-    setPhotos((prev) => [...result.photos, ...prev]);
-    setErrors(result.errors);
-    setIsUploading(false);
-  };
+    setPhotos((prev) => [...result.photos, ...prev])
+    setErrors(result.errors)
+    setIsUploading(false)
+  }
 
   return (
     <section>
       <h2>Upload Item Photos</h2>
 
-      <input
-        type="file"
-        accept="image/*"
-        multiple
-        onChange={handleFileChange}
-      />
+      <input type="file" accept="image/*" multiple onChange={handleFileChange} />
 
       <button type="button" onClick={handleUpload} disabled={isUploading}>
         {isUploading ? 'Uploading...' : 'Upload up to 3 photos'}
@@ -69,5 +60,5 @@ export function ItemPhotoUploaderExample({ itemId }: ItemPhotoUploaderExamplePro
         ))}
       </div>
     </section>
-  );
+  )
 }
